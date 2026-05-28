@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MBTI过时了？试试BJTI吧！</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            -webkit-tap-highlight-color: transparent;
+            color: #334155;
+        }
+        
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        .fade-out { animation: fadeOut 0.3s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s ease-out forwards; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-10px); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Loader Animation */
+        .loader { border-top-color: #1d4ed8; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Floating Bubbles for Welcome Screen */
+        .bubble { position: absolute; border-radius: 50%; background: rgba(37, 99, 235, 0.1); animation: float 6s infinite ease-in-out; }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-20px); } 100% { transform: translateY(0px); } }
+
+        .option-btn.selected { background-color: #eff6ff; border-color: #3b82f6; color: #1d4ed8; }
+
+        ::-webkit-scrollbar { display: none; }
+        
+        /* Dimension Bar Animation */
+        .dim-bar { transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        /* Hidden Glow Effect */
+        @keyframes glow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .hidden-glow { background: linear-gradient(-45deg, #fbbf24, #f59e0b, #d97706, #fbbf24); background-size: 400% 400%; animation: glow 3s ease infinite; padding: 4px; border-radius: 1.75rem; box-shadow: 0 0 30px rgba(245, 158, 11, 0.4); }
+        
+        /* Shimmer overlay for hidden personality */
+        .shimmer {
+            position: absolute;
+            top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
+            transform: skewX(-20deg);
+            animation: shine 4s infinite;
+            z-index: 20;
+            pointer-events: none;
+        }
+        @keyframes shine { 0% { left: -100%; } 20% { left: 200%; } 100% { left: 200%; } }
+
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 selection:bg-blue-200">
+
+    <main id="app-container" class="w-full max-w-3xl bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden relative min-h-[600px] flex flex-col border border-white">
+        
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="flex-1 flex flex-col items-center justify-center p-8 md:p-12 text-center slide-up relative overflow-hidden bg-gradient-to-b from-blue-50 to-white">
+            <div class="bubble w-32 h-32 top-[-10%] left-[-10%]"></div>
+            <div class="bubble w-20 h-20 bottom-[10%] right-[-5%]" style="animation-delay: -2s;"></div>
+            <div class="bubble w-40 h-40 top-[20%] right-[10%] opacity-50 bg-amber-100" style="animation-delay: -4s;"></div>
+
+            <div class="z-10 bg-white p-6 rounded-3xl shadow-xl shadow-blue-900/5 mb-8 border border-white/50 w-full max-w-sm">
+                <h1 class="text-4xl md:text-5xl font-black text-slate-800 leading-tight tracking-tight whitespace-nowrap">
+                    MBTI过时了？<br>
+                    <span class="block mt-4 text-3xl md:text-4xl">试试 <span class="text-blue-600 italic drop-shadow-md transform -skew-x-6 inline-block scale-110">BJTI</span> 吧！</span>
+                </h1>
+            </div>
+            
+            <p class="z-10 text-slate-600 mb-10 leading-relaxed font-medium text-lg">
+                测一测在八局的大事件中，<br>谁才是你的“打工人格”。
+            </p>
+            
+            <button onclick="window.app.startTest()" class="z-10 group relative px-10 py-4 bg-blue-600 text-white rounded-full font-bold text-lg overflow-hidden transition-all hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-600/30 w-full sm:w-auto transform hover:-translate-y-1">
+                <span class="relative z-10 flex items-center justify-center gap-2 tracking-wide">
+                    开始测试 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </span>
+            </button>
+            <div class="z-10 mt-6 text-sm font-bold text-slate-400 bg-white/80 px-4 py-1.5 rounded-full">共 20 题</div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden flex-1 flex flex-col p-6 md:p-10 relative bg-white">
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <button id="btn-prev" onclick="window.app.prevQuestion()" class="flex items-center text-sm font-bold text-slate-400 hover:text-blue-600 transition-colors opacity-0 pointer-events-none">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                        返回上一题
+                    </button>
+                    <span id="progress-text" class="text-sm font-black text-slate-500 bg-slate-100 px-3 py-1 rounded-full">1 / 20</span>
+                </div>
+                <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="h-full bg-blue-600 rounded-full transition-all duration-500 ease-out" style="width: 5%"></div>
+                </div>
+            </div>
+
+            <div id="question-container" class="flex-1 flex flex-col justify-center">
+                <h2 id="question-text" class="text-lg md:text-xl font-bold text-slate-800 mb-8 leading-relaxed whitespace-pre-line">
+                    <!-- Question text injected here -->
+                </h2>
+                <div id="options-container" class="space-y-3">
+                    <!-- Options injected here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="hidden flex-1 flex-col items-center justify-center bg-slate-900 z-50">
+            <div class="relative w-32 h-32 mb-8">
+                <div class="absolute inset-0 rounded-full border-4 border-slate-700"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"></div>
+                <div class="absolute inset-2 rounded-full border-4 border-slate-700"></div>
+                <div class="absolute inset-2 rounded-full border-4 border-purple-500 border-b-transparent animate-spin" style="animation-direction: reverse; animation-duration: 2s;"></div>
+                <div class="absolute inset-0 flex items-center justify-center text-3xl">🧬</div>
+            </div>
+            <h2 class="text-2xl font-black text-white mb-2 tracking-widest animate-pulse">基因测算中...</h2>
+            <p class="text-slate-400 font-medium tracking-wider text-sm">正在匹配你的多维人格与隐藏特质</p>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="hidden flex-1 flex flex-col bg-slate-50 relative overflow-y-auto w-full">
+            
+            <div class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 p-4 flex justify-between items-center shadow-sm" id="action-bar">
+                <button onclick="window.app.resetTest()" class="text-slate-500 hover:text-slate-800 font-bold text-sm px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors">重新测试</button>
+                <button onclick="window.app.generatePoster()" class="bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg hover:bg-blue-700 flex items-center gap-2 transition-all hover:shadow-blue-600/30">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    生成分享海报
+                </button>
+            </div>
+
+            <div id="capture-area" class="p-4 md:p-8 w-full bg-slate-50">
+                <!-- Inner Container (Will get glowing border if Hidden) -->
+                <div id="card-wrapper" class="rounded-[1.75rem] transition-all duration-700">
+                    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8 w-full h-full relative overflow-hidden" id="inner-card">
+                        
+                        <!-- Top Section -->
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 mb-8">
+                            <div class="col-span-1 md:col-span-5 flex flex-col items-center justify-center">
+                                <div class="text-slate-500 text-sm font-bold mb-3 tracking-widest uppercase">你的人格类型是</div>
+                                
+                                <!-- Precise Sprite Background Avatar Box - 300x300 format -->
+                                <div id="res-avatar-box" class="w-48 h-48 rounded-[2rem] shadow-xl border-4 border-white mb-4 relative bg-slate-50 overflow-hidden transition-transform hover:scale-105 duration-300 flex items-center justify-center">
+                                    <div id="res-avatar-bg" class="absolute inset-0 bg-no-repeat transition-all duration-300"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-span-1 md:col-span-7 flex flex-col justify-center items-center md:items-start text-center md:text-left">
+                                <div class="text-xs font-bold text-slate-400 mb-2 uppercase tracking-widest">你的主类型</div>
+                                <div class="text-3xl md:text-4xl font-black text-slate-800 mb-2" id="res-main-title">
+                                    节点屠夫 <span class="text-2xl text-slate-400 font-semibold tracking-normal inline-block align-baseline">(DATE)</span>
+                                </div>
+                                
+                                <!-- Rarity/Tag Box -->
+                                <div id="rarity-box" class="mt-4 border p-4 rounded-2xl relative overflow-hidden group w-full max-w-sm transition-all duration-500">
+                                    <div class="absolute -right-4 -top-4 opacity-10 transform rotate-12 transition-transform group-hover:rotate-45 group-hover:scale-125 duration-500" id="rarity-icon">
+                                        <svg class="w-20 h-20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                                    </div>
+                                    <div class="flex items-start gap-2 relative z-10">
+                                        <span class="text-lg leading-none mt-0.5 animate-pulse" id="rarity-sparkle">✨</span>
+                                        <span class="text-sm font-bold leading-relaxed text-left" id="res-rarity-text">
+                                            全局占比7.6%，自带节点闹钟。
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Middle Section (Description) -->
+                        <div class="mb-10">
+                            <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                                <h3 class="text-base font-black text-slate-800 mb-3 flex items-center gap-2">
+                                    <div class="w-1.5 h-4 bg-blue-600 rounded-full" id="desc-indicator"></div>
+                                    人格特征解读
+                                </h3>
+                                <p id="res-desc" class="text-sm text-slate-600 leading-loose text-justify font-medium whitespace-pre-line">
+                                    <!-- Desc injected -->
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Section (15 Dimensions) -->
+                        <div id="dimension-section">
+                            <h3 class="text-base font-black text-slate-800 mb-5 flex items-center gap-2 px-2">
+                                <div class="w-1.5 h-4 bg-blue-600 rounded-full" id="dim-indicator"></div>
+                                十五维度评分
+                            </h3>
+                            <div id="dimensions-container" class="grid grid-cols-1 gap-3">
+                                <!-- Dimensions injected dynamically -->
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center opacity-70 relative z-10">
+                            <div class="text-xs text-slate-500 font-bold tracking-widest uppercase">中建八局年度人格类型测试</div>
+                            <div class="text-xs text-slate-400 font-mono font-black">POWERED BY BJWQ</div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Poster Modal -->
+    <div id="poster-modal" class="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-sm hidden flex-col items-center justify-center p-4">
+        <div class="w-full max-w-md flex justify-between items-center mb-4">
+            <span id="poster-tip" class="text-white text-sm font-bold tracking-widest bg-black/50 px-4 py-1.5 rounded-full">✨ 长按图片保存分享</span>
+            <button onclick="document.getElementById('poster-modal').classList.add('hidden')" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/40 transition">✕</button>
+        </div>
+        <div class="w-full max-w-md max-h-[85vh] overflow-y-auto rounded-3xl shadow-2xl scrollbar-hide flex justify-center">
+            <img id="poster-image" src="" alt="分享海报" class="w-full h-auto rounded-3xl hidden">
+            <!-- 新增：用于本地降级展示的 Canvas 容器 -->
+            <div id="canvas-container" class="w-full h-auto rounded-3xl overflow-hidden hidden"></div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-slate-800/90 backdrop-blur text-white px-6 py-3 rounded-full text-sm font-bold tracking-wider opacity-0 transition-opacity pointer-events-none z-[110] shadow-xl">
+        海报生成中，请稍候...
+    </div>
+
+    <script>
+        // 1. Raw Data Defs (With Complete Desc and Dimensions)
+        const rawDimsData = `
+==NORMAL==
+DATE｜节点屠夫｜全局占比7.6%，自带节点闹钟。｜你对时间、进度和关键线路有近乎本能的敏感，任何一个红点、延期、卡口，都会迅速触发你的行动状态。你最擅长把目标从会议室、计划表和作战图上推到现场，把“应该完成”压实成“必须兑现”。在项目推进最吃劲的时候，你通常是那个盯住节点不松手、推动资源往前走的人。\n\n复杂任务落到你手里，会先被拆成时间、责任、节点和结果。你不喜欢悬空讨论，也不迷恋漂亮口号，更关心今天有没有推进、明天能不能闭合、关键节点能不能按时拿下。你的价值感来自兑现，压力越集中，你越容易进入战斗状态。
+B1 战略雷达｜3分｜大方向你能看懂，但你更关心今天到底能不能往前拱一步。
+B2 节点压迫感｜5分｜节点一变红，你的精神闹钟比手机铃声还响。
+B3 方案修复力｜4分｜方案可以再修，但节点必须先从危险区捞出来。
+B4 现场续航值｜4分｜现场一有风吹草动，你基本能自动刷新定位。
+B5 表格驯化力｜3分｜表格能用就行，重点是它能不能推动进度往前走。
+B6 合规护盾｜3分｜规矩你会守，但你不会让流程把节点按在原地。
+B7 经营算盘｜3分｜你知道进度背后也连着产值、成本和现金流。
+B8 结算潜行力｜2分｜资料你会看，但你通常先让节点安全过关。
+B9 客户连接度｜2分｜客户很重要，但你更擅长用履约成绩说话。
+B10 创优执念｜3分｜节点顺利拿下后，奖杯可以顺手许个愿。
+B11 科技炼化值｜2分｜技术很好，但你第一句会问：能不能帮现场提速？
+B12 故事捕光力｜2分｜你有故事，只是经常忙到没空讲。
+B13 保障兜底力｜3分｜需要补位时，你通常先顶上，事后再喘气。
+B14 团队充气值｜3分｜你鼓舞人的方式很直接：别慌，今天必须有进展。
+B15 抗压续航值｜5分｜压力越大，你越像被关键线路点亮了电源。
+PLAN｜方案修理师｜全局占比7.2%，天生“再改一版”体质。｜你擅长把复杂局面拆成路径、动作、责任和支撑条件，也擅长把一团模糊想法修成能执行、能检查、能交付的方案。别人看到的是“这事不好办”，你看到的是目标、障碍、资源和下一版优化空间。\n\n你的工作方式带有很强的组织感和修复感。方案不顺，你会补逻辑；流程卡住，你会调路径；责任不清，你会重排动作。你未必总是冲在最前面，但很多事情能从混乱走向清晰，往往靠你一版一版把骨架搭稳。
+B1 战略雷达｜4分｜你能把宏大方向翻译成明天就能干的小动作。
+B2 节点压迫感｜4分｜节点会催你，但你会先把路线修到能跑。
+B3 方案修复力｜5分｜别人说“想办法”，你已经打开第八版方案。
+B4 现场续航值｜3分｜你会去现场，但最好让你带着方案去。
+B5 表格驯化力｜4分｜好方案旁边，必须配一张能镇场子的表。
+B6 合规护盾｜4分｜方案可以灵活，边界必须清楚，脑洞也要戴安全帽。
+B7 经营算盘｜3分｜成本你会考虑，但不会让算盘把办法锁死。
+B8 结算潜行力｜3分｜资料链条你会顾及，防止后面说不清。
+B9 客户连接度｜3分｜客户需求你会听，听完会立刻转成工作语言。
+B10 创优执念｜3分｜方案修得漂亮，创优就有了骨架。
+B11 科技炼化值｜3分｜新技术可以上，但先得嵌进可执行路径。
+B12 故事捕光力｜3分｜你能讲故事，前提是逻辑已经修通。
+B13 保障兜底力｜3分｜你不一定最爱兜底，但会把兜底动作写进方案。
+B14 团队充气值｜3分｜你安慰人的方式很务实：我再排一版。
+B15 抗压续航值｜4分｜你会累，但方案没定之前，系统不允许关机。
+BIRD｜风向先飞鸟｜全局占比5.8%，先飞体质，风一动你先抖翅膀。｜你对政策变化、市场机会、新赛道、新技术和外部趋势格外敏感，常常能在别人还没完全注意到的时候，先捕捉到方向变化。你负责提醒团队：下一阵风可能已经来了。\n\n你看问题习惯先抬头，看趋势、看机会、看变化背后的价值空间。你不满足于只盯眼前的一亩三分地，更愿意从行业、区域、客户和政策的变化中寻找新可能。你的优势在于探路、预判和打开视野，让团队不至于只在原地打转。
+B1 战略雷达｜5分｜风还没吹到脸上，你的天线已经开始晃。
+B2 节点压迫感｜2分｜节点你知道重要，但你更爱看远处的云。
+B3 方案修复力｜3分｜你能指出方向，细化方案需要队友接力。
+B4 现场续航值｜2分｜你不一定天天在现场，但常常第一个发现新方向。
+B5 表格驯化力｜2分｜表格可以有，但别挡住你看风口的视线。
+B6 合规护盾｜2分｜边界你会看，但机会窗口更容易让你眼睛发亮。
+B7 经营算盘｜4分｜你能敏锐判断风向背后的价值空间。
+B8 结算潜行力｜1分｜资料深潜不是主场，你更适合高空侦察。
+B9 客户连接度｜4分｜客户一有新动向，你大概率能先收到信号。
+B10 创优执念｜3分｜新方向如果够亮，你也会顺手想想荣誉。
+B11 科技炼化值｜4分｜新技术、新产品、新赛道，都是你的快乐源泉。
+B12 故事捕光力｜4分｜风向本身就是故事，你很会抓第一阵风。
+B13 保障兜底力｜2分｜你更适合探路，兜底可以呼叫百宝箱队友。
+B14 团队充气值｜3分｜你会用“有新机会”给大家续一口气。
+B15 抗压续航值｜3分｜你能抗压，最好让你抗在机会前线。
+MECH｜工地永动机｜全局占比6.4%，现场电量常年满格。｜你相信真正的答案往往藏在现场，机械转没转、作业面顺不顺、交叉施工卡不卡、方案落地稳不稳，都要亲眼看过才踏实。你说“我去看一眼”，通常就意味着半天过去了。\n\n你最强的地方是把问题拉回真实场景。纸面方案再完整，也要经得起现场一铲子；管理要求再漂亮，也要能落在工人、设备、材料和作业面上。你带回来的有现场情况，也有判断、底气和解决问题的方向。
+B1 战略雷达｜2分｜战略你听得懂，但你更关心现场机器转没转。
+B2 节点压迫感｜4分｜节点一压下来，你的脚已经往现场走了。
+B3 方案修复力｜3分｜方案可以改，但必须经得起现场一铲子。
+B4 现场续航值｜5分｜你的续航逻辑很朴素：人在现场，心就踏实。
+B5 表格驯化力｜2分｜表可以回来再补，现场不能原地等表。
+B6 合规护盾｜3分｜你知道安全和流程是现场底线，不能靠运气。
+B7 经营算盘｜2分｜你会节约资源，但不会把账天天挂嘴边。
+B8 结算潜行力｜2分｜资料你会配合，主场仍在施工面。
+B9 客户连接度｜2分｜客户关系重要，但你更习惯让现场表现开口。
+B10 创优执念｜3分｜好现场是创优的第一块砖。
+B11 科技炼化值｜3分｜技术能让现场更顺，你就愿意试。
+B12 故事捕光力｜2分｜你的故事都在现场，只是你常常没空拍。
+B13 保障兜底力｜3分｜现场缺什么，你经常直接顺手补上。
+B14 团队充气值｜3分｜你用行动带动人，比喊口号更有说服力。
+B15 抗压续航值｜5分｜只要项目还在转，你就像没有关机键。
+EXCL｜表格驯兽师｜全局占比6.8%，被Excel选中的人。｜再散的信息、再乱的任务、再复杂的进度，到你手里都得排队、编号、分类、归档。你会做表格，也擅长用表格给组织建立秩序，让进展有迹可循，让问题有处可查，让责任有据可依。\n\n你的优势在于把混乱变成结构。别人说不清的情况，你能拉出清单；别人记不住的节点，你能做成台账；别人容易漏掉的材料，你能放进闭环。你让组织从“感觉差不多”走向“数据说得清”，也让很多复杂工作有了可控感。
+B1 战略雷达｜3分｜你能理解方向，并习惯把方向做成表。
+B2 节点压迫感｜3分｜节点在你眼里最好以红黄绿形式出现。
+B3 方案修复力｜4分｜方案乱不怕，先拉清单再治理。
+B4 现场续航值｜2分｜你不一定冲在现场，但你能让现场数据归队。
+B5 表格驯化力｜5分｜再野的信息，见到你也得排队站好。
+B6 合规护盾｜4分｜你相信合规动作也需要表格留痕。
+B7 经营算盘｜4分｜数字一出来，你能马上看出哪里不对劲。
+B8 结算潜行力｜4分｜资料、台账、证据链，你都能整理得有章法。
+B9 客户连接度｜2分｜你不一定最会聊，但能把客户信息整理清楚。
+B10 创优执念｜3分｜创优材料要靠好台账支撑，散装可不行。
+B11 科技炼化值｜3分｜技术成果也要先进入你的清单系统。
+B12 故事捕光力｜2分｜你讲故事比较克制，但数据会替你发言。
+B13 保障兜底力｜4分｜缺材料、缺清单、缺统计时，你特别可靠。
+B14 团队充气值｜2分｜你不常喊口号，但会默默把混乱理顺。
+B15 抗压续航值｜4分｜表越多，你越安静；越安静，越说明正在输出。
+SAFE｜红线结界师｜全局占比6.5%，自带组织护盾。｜你对风险、边界、依据、流程和底线有很强的敏感度，遇到问题时总会先确认这件事能不能做、怎么做才稳、哪些地方不能踩。你看起来是在反复确认，实际上是在替团队提前挡坑。\n\n你的价值在于让事情跑得快，也跑得稳。节点要抢，红线要亮；目标要冲，边界要清。越是复杂场景、重大项目、关键决策和高压任务，越需要你把风险前置、把漏洞补住、把底盘压实。你让团队少返工、少被动，也少踩坑。
+B1 战略雷达｜3分｜你会看方向，也会顺手找边界。
+B2 节点压迫感｜3分｜节点要抢，红线也要亮着。
+B3 方案修复力｜4分｜你最擅长把方案修到“能干且稳”。
+B4 现场续航值｜2分｜你不一定天天跑现场，但你会盯住风险现场。
+B5 表格驯化力｜4分｜制度落实最好有表、有痕、有闭环。
+B6 合规护盾｜5分｜你一出现，风险都想绕路走。
+B7 经营算盘｜3分｜赚钱重要，稳稳地赚更重要。
+B8 结算潜行力｜4分｜证据、依据、流程缺一不可，你很清楚。
+B9 客户连接度｜2分｜你不主打热络，但能让合作关系更稳。
+B10 创优执念｜2分｜荣誉可以冲，底线必须先站稳。
+B11 科技炼化值｜2分｜技术创新你支持，验证和边界也要跟上。
+B12 故事捕光力｜2分｜你不急着出圈，先确保别出事。
+B13 保障兜底力｜4分｜关键时刻你能把流程漏洞补住。
+B14 团队充气值｜3分｜你给团队的安全感来自“这事有依据”。
+B15 抗压续航值｜4分｜越是高压，你越要把规矩守住。
+SPIN｜现场陀螺人｜全局占比0.1%，移动办公增强版。｜办公室找你，现场找你，群里也找你；你看起来一直在转，实际上是在用脚步刷新事实，用行动消灭悬空判断。你习惯在不同场景之间快速切换，把问题从现场带回桌面，再把解决动作带回现场。\n\n你的优势是反应快、到位快、补位快。哪里缺情况，你去看；哪里卡协调，你去跑；哪里需要确认，你直接到场。你未必总有时间把自己讲得很清楚，但很多问题因为你转起来，才没有继续悬着。你像项目里的移动连接点，把散落的信息和动作重新接上。
+B1 战略雷达｜2分｜你不是不看战略，只是脚已经先出发了。
+B2 节点压迫感｜4分｜节点一紧，你转得更快。
+B3 方案修复力｜3分｜你喜欢用现场情况反向修正方案。
+B4 现场续航值｜5分｜你的导航记录大概能写成项目地图。
+B5 表格驯化力｜2分｜表格可以回来补，现场先跑起来。
+B6 合规护盾｜3分｜你知道现场越忙，底线越不能乱。
+B7 经营算盘｜2分｜你会注意浪费，但精力主要在现场。
+B8 结算潜行力｜2分｜资料不是主战场，但你能提供现场证据。
+B9 客户连接度｜3分｜你能在现场把关系跑热。
+B10 创优执念｜3分｜好现场跑多了，自然知道亮点藏在哪。
+B11 科技炼化值｜2分｜技术你看落地，不看概念飘不飘。
+B12 故事捕光力｜3分｜你能提供一线素材，虽然常常忘记拍照。
+B13 保障兜底力｜4分｜哪里缺人缺物，你经常顺手顶上。
+B14 团队充气值｜3分｜你不一定会讲，但你会陪大家一起转。
+B15 抗压续航值｜5分｜你像陀螺，压力越大转速越稳。
+CASH｜回款锦鲤｜全局占比0.001%，心里常驻到账提醒。｜你看项目，会同时看干得漂不漂亮、成果能不能变成收入、利润和现金流。产值、成本、确权、回款、资金节奏，在你眼里都关系着经营质量能不能站住。\n\n你的判断通常很现实，也很必要。奖项再亮，账要算清；项目再大，现金流要稳；节点再漂亮，价值要落袋。你擅长把高光拉回经营，把热闹拉回质量，把“干成了”继续追问到“收回来了没有”。你是经营底线的提醒者，也是项目成果转化为真金白银的守门员。
+B1 战略雷达｜4分｜你能从方向里看见价值空间。
+B2 节点压迫感｜3分｜节点重要，因为它影响产值和回款。
+B3 方案修复力｜3分｜方案好不好，最终要看价值能不能落地。
+B4 现场续航值｜2分｜你不一定天天在现场，但关心现场能否转成收益。
+B5 表格驯化力｜4分｜钱的事必须算清楚，最好还有表。
+B6 合规护盾｜4分｜经营质量要稳，风险不能埋。
+B7 经营算盘｜5分｜到账提醒是你的精神背景音。
+B8 结算潜行力｜4分｜回款背后，资料和确权都不能软。
+B9 客户连接度｜3分｜客户关系重要，因为钱也要靠沟通往回走。
+B10 创优执念｜2分｜奖杯很好，现金流更让你安心。
+B11 科技炼化值｜2分｜技术可以投，你会顺手问回报周期。
+B12 故事捕光力｜2分｜故事要讲，账也要算。
+B13 保障兜底力｜3分｜你能兜住经营层面的关键提醒。
+B14 团队充气值｜2分｜你鼓励人的方式是：这笔回来了就稳。
+B15 抗压续航值｜4分｜回款没动静时，你依然能保持微笑。
+SETT｜结算扫地僧｜全局占比4.8%，资料深处的隐藏高手。｜你平时可能不太显眼，但一到签证、变更、确权、结算和证据链环节，你的价值就会迅速显现。别人看到的是一堆材料，你看到的是依据、逻辑、金额和最后能不能说得清。\n\n你擅长在细节深处守住项目成果。每一页资料、每一次确认、每一条记录，都可能关系到最终收益。你不靠声量证明自己，靠证据、闭环和耐心把该拿回来的东西一点点守住。越是难啃的资料山，越能看出你的定力。
+B1 战略雷达｜2分｜你不总抬头看风口，但低头能找到证据。
+B2 节点压迫感｜3分｜节点你关心，更关心节点后面有没有资料闭环。
+B3 方案修复力｜4分｜你能把结算难题拆成证据链。
+B4 现场续航值｜2分｜你跑现场多半是为了补关键依据。
+B5 表格驯化力｜5分｜资料山再高，也能被你编号归档。
+B6 合规护盾｜4分｜没有依据的东西，你很难放心。
+B7 经营算盘｜5分｜每一页资料在你眼里都可能变成钱。
+B8 结算潜行力｜5分｜你是资料深处的隐藏高手。
+B9 客户连接度｜2分｜你不一定最会寒暄，但能把证据摆明白。
+B10 创优执念｜2分｜你对奖杯淡定，对确权更有感情。
+B11 科技炼化值｜2分｜技术你会看，但更关心它怎么形成可计量成果。
+B12 故事捕光力｜1分｜你讲得少，但证据自己会发光。
+B13 保障兜底力｜3分｜关键材料缺口，你经常能补回来。
+B14 团队充气值｜2分｜你不太煽情，但一句“资料找到了”足够提气。
+B15 抗压续航值｜5分｜资料越难啃，你越像进入了闭关状态。
+TALK｜属地社牛王｜全局占比6.3%，社交电量比手机还耐用。｜政府、平台、客户、伙伴、街镇、学校、社区，你总能在一轮轮沟通中找到切口，把陌生关系聊成熟悉信任。你擅长让企业真正扎进区域，也擅长让一次见面慢慢变成长久连接。\n\n你的能力体现在懂场合、懂分寸、懂关系背后的合作可能。你能把拜访做成铺垫，把交流做成线索，把服务做成信任。属地深耕、客户经营、公共项目和区域拓展中，你往往是那个把门敲开、把场子聊热、把关系做厚的人。
+B1 战略雷达｜4分｜你能从区域变化里看见机会。
+B2 节点压迫感｜2分｜节点你知道重要，但你更关心关系有没有跑通。
+B3 方案修复力｜3分｜沟通卡住时，你能换个说法继续推进。
+B4 现场续航值｜3分｜你不怕跑，因为很多信任都是跑出来的。
+B5 表格驯化力｜2分｜你更爱面对面，不太想和表格深情对视。
+B6 合规护盾｜3分｜关系要热，边界也要清。
+B7 经营算盘｜4分｜你知道好关系最终要转成好项目。
+B8 结算潜行力｜2分｜结算不是主场，但你知道沟通能帮上忙。
+B9 客户连接度｜5分｜你的社交电量常常比手机还耐用。
+B10 创优执念｜2分｜荣誉有用，合作做实更要紧。
+B11 科技炼化值｜2分｜技术你会听，重点是客户买不买账。
+B12 故事捕光力｜4分｜你很会把关系讲成故事，把故事讲成信任。
+B13 保障兜底力｜3分｜接待、协调、拜访，你经常能补位。
+B14 团队充气值｜4分｜你能把场子聊热，也能把团队聊稳。
+B15 抗压续航值｜4分｜拜访一轮又一轮，你依然能笑着开场。
+TOWR｜客户信号塔｜全局占比5.4%，长期在线，信号稳定。｜你对客户需求、合作温度、外部变化和关系波动非常敏感，客户那边一有细微变化，你往往能较早感受到。你像一座持续在线的信号塔，把外部需求和内部资源接通，把不确定的信息转成可响应的动作。\n\n你的价值在于不断线。客户关心什么、担心什么、期待什么，团队需要及时知道；企业能做什么、怎么回应、如何调整，也需要你翻译出去。你不一定站在最热闹的位置，但关键时候绝不能离线，因为很多合作关系正是靠长期稳定的响应慢慢建立起来的。
+B1 战略雷达｜4分｜客户的微小变化，你常能读出大方向。
+B2 节点压迫感｜2分｜你会关注节点，因为节点影响客户感受。
+B3 方案修复力｜3分｜客户需求一变，你会帮团队及时调频。
+B4 现场续航值｜2分｜你不一定常驻现场，但能让信息不断线。
+B5 表格驯化力｜3分｜客户信息你会记录，不靠记忆硬扛。
+B6 合规护盾｜3分｜关系要稳，规则也要稳。
+B7 经营算盘｜4分｜你知道客户连接背后是长期价值。
+B8 结算潜行力｜2分｜你不是主攻结算，但能帮助疏通信号。
+B9 客户连接度｜5分｜你像一座信号塔，关键时候不能离线。
+B10 创优执念｜2分｜客户认可比奖杯更先进入你的视野。
+B11 科技炼化值｜2分｜技术你会转译成客户听得懂的话。
+B12 故事捕光力｜3分｜你能讲客户听得进去的故事。
+B13 保障兜底力｜3分｜客户需要响应时，你会马上接入。
+B14 团队充气值｜3分｜你给团队的信心来自“客户那边我来沟通”。
+B15 抗压续航值｜4分｜客户需求不断变化，你也保持在线。
+GOLD｜创优许愿池｜全局占比5.6%，自带高光。｜你对品质、荣誉、奖项和成果呈现有天然敏感度，项目刚开工，你心里的奖杯可能已经开始发光。你看现场会看细节，看方案会看亮点，看过程会看资料，看成果会想它能不能成为企业名片。\n\n你不满足于把事情做完，更希望把事情做精、做亮、做出辨识度。创优对你来说是一套长期工程，从策划、过程控制、资料积累、现场呈现到最终申报，每一步都要提前布置。你能把团队从“完成任务”推向“追求卓越”，也能让普通成果被打磨出更高的光泽。
+B1 战略雷达｜3分｜你能看方向，但更擅长发现其中的标杆价值。
+B2 节点压迫感｜3分｜节点要稳，因为创优不能靠临时抱佛脚。
+B3 方案修复力｜4分｜你会把普通方案往精品路径上修。
+B4 现场续航值｜3分｜你愿意看现场，因为奖项藏在细节里。
+B5 表格驯化力｜3分｜创优资料不能散，台账必须跟上。
+B6 合规护盾｜3分｜好工程首先得经得起检查。
+B7 经营算盘｜2分｜价值你会考虑，但奖项光芒更吸引你。
+B8 结算潜行力｜2分｜结算不是重点，但资料意识不能缺。
+B9 客户连接度｜3分｜客户认可也是创优路上的重要一票。
+B10 创优执念｜5分｜项目刚开工，你心里的奖杯已经发光。
+B11 科技炼化值｜4分｜没有技术亮点的创优，你会觉得不够硬。
+B12 故事捕光力｜4分｜好项目要会干，也要会被看见。
+B13 保障兜底力｜3分｜创优现场，你知道每个细节都不能掉。
+B14 团队充气值｜4分｜你很会用荣誉感把队伍拉起来。
+B15 抗压续航值｜4分｜创优路长，但你能一轮轮打磨。
+TECH｜科技炼丹师｜全局占比5.1%，技术脑袋，自动起课题名。｜别人看到现场难题，你已经开始联想到工法、专利、课题、产品和验证路径。你对新技术、新材料、新装备、新平台有天然兴趣，更擅长把一线问题放进技术体系里重新求解。\n\n你的价值在于把经验炼成能力。一个项目里的难点，经过你的转化，可能变成技术成果；一次现场试验，经过你的沉淀，可能变成可复制方法。你不会满足于概念好听，更关心技术能不能落地、能不能验证、能不能形成企业真正可用的能力。
+B1 战略雷达｜4分｜新技术、新产品、新平台，你总能闻到研究味。
+B2 节点压迫感｜2分｜节点你关心，但更关心技术能否形成能力。
+B3 方案修复力｜4分｜你喜欢用技术把老问题换个解法。
+B4 现场续航值｜3分｜你会去现场，因为实验最终要落地。
+B5 表格驯化力｜3分｜技术数据需要整理，不能只靠灵感。
+B6 合规护盾｜3分｜创新要大胆，验证要稳妥。
+B7 经营算盘｜3分｜技术最好能转化成产品和价值。
+B8 结算潜行力｜2分｜结算你不主攻，但会关心技术成果怎么计量。
+B9 客户连接度｜2分｜客户你会接触，但更擅长讲技术逻辑。
+B10 创优执念｜4分｜技术成果天生有冲奖潜质。
+B11 科技炼化值｜5分｜别人看到难题，你已经开始起课题名。
+B12 故事捕光力｜3分｜技术故事能讲，但不能牺牲专业性。
+B13 保障兜底力｜2分｜你更像发动机，不太像工具箱。
+B14 团队充气值｜3分｜新技术跑通时，你能让团队兴奋起来。
+B15 抗压续航值｜4分｜实验失败几次，你还能继续调参。
+MEME｜故事捕光者｜全局占比6.7%，自带高光捕捉系统。｜同样一个现场，别人看到钢筋混凝土，你能看到年度高光、传播标题、团队记忆和企业气质。你擅长把工程背后的价值讲出来，让项目被看见，让团队被记住，也让企业能力有画面感。\n\n你的优势是把事实转化为表达。一个节点、一项技术、一次攻坚、一座建筑，在你手里都可能变成有温度、有节奏、有传播力的故事。你不追求空泛热闹，更懂得从真实劳动、真实成果和真实场景里提炼打动人的内容。
+B1 战略雷达｜4分｜你知道哪些大事值得被放大。
+B2 节点压迫感｜2分｜节点你会关注，因为节点常常是故事高潮。
+B3 方案修复力｜3分｜传播方案也要一版版修到能打。
+B4 现场续航值｜3分｜你会跑现场，只为抓到最亮的一瞬间。
+B5 表格驯化力｜2分｜表格你会做，但它最好服务于选题。
+B6 合规护盾｜2分｜你知道表达要稳，也要打动人。
+B7 经营算盘｜2分｜经营很重要，你更关心它怎么被讲明白。
+B8 结算潜行力｜1分｜资料深潜不是主场，光影和文字才是。
+B9 客户连接度｜4分｜你知道好的传播也能增进认同和连接。
+B10 创优执念｜4分｜荣誉故事是你最爱的素材之一。
+B11 科技炼化值｜3分｜技术你会转译成大众能懂的亮点。
+B12 故事捕光力｜5分｜同样一个现场，你能看见别人没看见的光。
+B13 保障兜底力｜3分｜传播现场你也能补位，设备、素材、节奏都要管。
+B14 团队充气值｜4分｜你让团队觉得自己的辛苦值得被看见。
+B15 抗压续航值｜4分｜越赶稿，你越能在键盘前保持输出。
+BOXX｜保障百宝箱｜全局占比6.9%，组织的随身工具包。｜材料、会务、车辆、设备、流程、提醒、附件、物资、现场支撑，你总能在关键时刻掏出办法。别人看到的是活动顺利、会议顺畅、项目推进有序，你知道背后刚刚救了多少小火。\n\n你的能力体现在细处，也体现在急处。事情越杂，越需要你分类兜住；场面越大，越需要你提前补齐；节点越紧，越需要你把支撑条件准备到位。你不一定最抢镜，但很多顺利进行的背后，都有你提前一步的准备和关键时刻的补位。
+B1 战略雷达｜2分｜你不一定总看远方，但眼前的事你能兜住。
+B2 节点压迫感｜3分｜节点到来前，你已经在补材料、补设备、补提醒。
+B3 方案修复力｜3分｜方案卡住时，你常能补上现实条件。
+B4 现场续航值｜3分｜需要你到现场时，你通常带着一包解决办法。
+B5 表格驯化力｜4分｜保障事项多，不建表根本兜不住。
+B6 合规护盾｜4分｜保障工作越细，流程边界越不能乱。
+B7 经营算盘｜3分｜你知道节约每一分，也能保障每一场。
+B8 结算潜行力｜2分｜不是主攻结算，但票据材料不能丢。
+B9 客户连接度｜3分｜接待和服务里，也藏着关系维护。
+B10 创优执念｜2分｜你不一定站在领奖台，但你保障领奖台搭起来。
+B11 科技炼化值｜2分｜技术不是主场，但你会保障技术展示顺利。
+B12 故事捕光力｜2分｜你不抢镜，但很多故事少不了你。
+B13 保障兜底力｜5分｜你像组织的随身工具包，关键时刻总能掏出办法。
+B14 团队充气值｜4分｜你让大家感觉：后方稳，前方就能冲。
+B15 抗压续航值｜5分｜别人看到顺利，你知道自己刚刚救了多少小火。
+PUMP｜精神打气筒｜全局占比6.8%，自带精神氧气瓶。｜你也会累，但你很少让队伍泄气。压力上来的时候，你擅长把话说亮，把场子托住，把目标讲得更有力量，让“我们一起上”听起来可信，也真的能动起来。\n\n你的价值在于稳定人心、提振状态、凝聚共识。任务重的时候，团队需要有人稳住气口；节点紧的时候，现场需要有人把信心撑起来；成果出来的时候，也需要有人把辛苦讲成荣誉。你能让大家重新看见方向，也能让一支队伍在高压中继续往前走。
+B1 战略雷达｜3分｜你看方向，也关心方向能不能鼓舞人。
+B2 节点压迫感｜3分｜节点紧张时，你会先稳住队伍气口。
+B3 方案修复力｜3分｜方案可以再修，人心不能先散。
+B4 现场续航值｜3分｜你愿意到现场，因为士气也需要在现场补。
+B5 表格驯化力｜2分｜表格可以慢慢填，先把大家状态拉回来。
+B6 合规护盾｜3分｜你知道守规矩能给团队安全感。
+B7 经营算盘｜2分｜你会算账，但更先看队伍有没有劲。
+B8 结算潜行力｜1分｜资料深处不是主场，情绪现场才是。
+B9 客户连接度｜4分｜你能把沟通变得更顺，把场子变得更暖。
+B10 创优执念｜3分｜荣誉感能激励团队，你很懂这一点。
+B11 科技炼化值｜2分｜技术你会支持，但更关心人能不能跟上。
+B12 故事捕光力｜4分｜你知道好故事能把队伍重新点亮。
+B13 保障兜底力｜3分｜你会补位，尤其在气氛快塌的时候。
+B14 团队充气值｜5分｜你是团队里的情绪打气筒，虽然自己也会漏气。
+B15 抗压续航值｜5分｜你不是不累，只是常常把自己切到团队优先模式。
+==HIDDEN==
+BRK｜破局者｜全局占比极其稀缺的0.08%，你一定就是天选之人吧，万里挑一的重要栋梁，团队关键时刻自带“开局按钮”的核心力量！｜你擅长在复杂局面里迅速找到第一块能撬动全局的支点。节点卡住、现场胶着、资源不到位、风险冒头、目标压顶时，你往往能先把混乱压成问题，再把问题拆成动作。你像一把带方向感的破壁锤，能把“暂时没办法”打成“先从这里开始”。\n\n越到难题面前，你越容易进入状态。别人看到的是一团乱线，你看到的是切口、路径、顺序和责任。你适合出现在攻坚项目、关键节点、复杂协调和阶段性突围场景里。
+B1 战略雷达｜4分｜你能看懂方向，更擅长判断从哪里撬动局面。
+B2 节点压迫感｜5分｜节点一紧，你的行动系统会自动启动。
+B3 方案修复力｜5分｜方案卡住时，你能迅速拆出替代路径。
+B4 现场续航值｜4分｜你愿意到现场找答案，因为破局点经常藏在一线。
+B5 表格驯化力｜3分｜你会用表格压住混乱，但不会被表格拖慢。
+B6 合规护盾｜4分｜你知道破局要有边界，动作越快越要稳。
+B7 经营算盘｜4分｜你会把节点、资源和效益一起看。
+B8 结算潜行力｜3分｜你有资料闭环意识，不会只顾前面冲。
+B9 客户连接度｜3分｜关键时刻你能用解决问题赢得信任。
+B10 创优执念｜3分｜你更关注先打通局面，后续再把亮点做厚。
+B11 科技炼化值｜4分｜新技术如果能解决真问题，你会很快接入。
+B12 故事捕光力｜3分｜你的故事通常来自一次硬仗打通后的反转。
+B13 保障兜底力｜4分｜资源缺口出现时，你能迅速组织补位。
+B14 团队充气值｜4分｜你能用“有办法”稳住团队情绪。
+B15 抗压续航值｜5分｜压力越集中，你越容易进入攻坚状态。
+BALL｜压舱石｜全局占比极其稀缺的0.07%，你一定就是天选之人吧，万里挑一的重要栋梁，团队无可替代的底盘重量！｜你未必总是站在最显眼的位置，但越到关键节点、复杂场面、风险叠加的时候，越能看出你的分量。你擅长把流程压实，把边界守住，把资源补齐，把团队托住。别人看到的是事情顺利推进，你看到的是每一个不能松的环节、每一处可能漏风的缝隙、每一次需要提前兜住的风险。\n\n你能让组织在高压中保持稳定。重大项目、重要会议、合规检查、安全攻坚、材料保障、经营节点、突发协调，这些场景都会激活你的底盘能力。你不追求一时热闹，更在意事情能不能稳稳落地、稳稳交付、稳稳过关。你像项目船舱深处的重量，平时不喧哗，风浪一来，全靠你压住重心。
+B1 战略雷达｜3分｜你能理解方向，但更关注方向落地时底盘稳不稳。
+B2 节点压迫感｜4分｜节点越紧，你越会提前检查支撑条件。
+B3 方案修复力｜4分｜方案有漏洞时，你能把缺口补成闭环。
+B4 现场续航值｜3分｜你会到现场看关键风险和保障条件。
+B5 表格驯化力｜5分｜台账、清单、流程、附件，是你稳定局面的工具。
+B6 合规护盾｜5分｜边界、依据、流程，你会一项一项压实。
+B7 经营算盘｜4分｜你知道稳定本身就是经营质量的一部分。
+B8 结算潜行力｜4分｜资料、证据、过程留痕，你会提前看住。
+B9 客户连接度｜3分｜你不一定最外向，但能用可靠感建立信任。
+B10 创优执念｜3分｜你相信高质量成果要先经得起检查。
+B11 科技炼化值｜2分｜技术可以用，但你会先确认它是否安全、可靠、可控。
+B12 故事捕光力｜2分｜你不抢镜，但很多好故事都靠你稳住底色。
+B13 保障兜底力｜5分｜关键时刻，你常常是最后一道稳压阀。
+B14 团队充气值｜4分｜你给团队的信心来自“这事有人兜着”。
+B15 抗压续航值｜5分｜压力越大，你越能沉住气，把局面压稳。
+OPEN｜开路者｜全局占比极其稀缺的0.05%，你一定就是天选之人吧，万里挑一的重要栋梁，带着光撕开新市场的先锋！｜你擅长看见机会入口，也擅长让资源、客户、区域和项目之间产生新的连接。对你来说，市场是一张需要持续经营的关系地图。你能从一次拜访、一条政策、一场会议、一个公共项目里看到更远的合作可能。\n\n你能把外部机会带回组织内部。属地深耕、客户维护、新赛道拓展、海外合作、区域布局、运营项目，这些场景都能激活你。你适合出现在市场前端、客户经营、资源整合、政企沟通和新业务拓展场景里。
+B1 战略雷达｜5分｜你能从区域变化和客户动向里看见机会。
+B2 节点压迫感｜3分｜你关注节点，因为履约表现会影响下一扇门。
+B3 方案修复力｜4分｜客户需求变化时，你能帮助团队调整打法。
+B4 现场续航值｜3分｜你愿意跑，因为很多机会都是跑出来的。
+B5 表格驯化力｜3分｜客户信息、项目线索、拜访记录，你会保持更新。
+B6 合规护盾｜3分｜关系要做热，边界也要守稳。
+B7 经营算盘｜4分｜你知道机会最终要转化为项目和价值。
+B8 结算潜行力｜2分｜结算不是主攻点，但你知道沟通能减少阻力。
+B9 客户连接度｜5分｜你能让陌生关系逐渐变成熟悉信任。
+B10 创优执念｜3分｜高品质项目会成为你打开市场的名片。
+B11 科技炼化值｜3分｜新技术、新产品、新模式都可能成为开路工具。
+B12 故事捕光力｜4分｜你会把企业能力讲成客户听得懂的价值。
+B13 保障兜底力｜3分｜接待、拜访、协调、推介，你能补上关键环节。
+B14 团队充气值｜4分｜你能让团队看到“还有新机会”。
+B15 抗压续航值｜4分｜一轮轮拜访和沟通之后，你还能继续往前推。
+PATH｜寻路者｜全局占比极其稀缺的0.07%，你一定就是天选之人吧，万里挑一的重要栋梁，团队在迷雾中最依赖的方向盘！｜你对新方向、新赛道、新模式特别敏感，但你的敏感并非单纯追风口，而是会继续追问：这条路能不能走、谁来走、怎么走、走到哪里算成。你常常站在当前任务和未来变化之间，把模糊趋势翻译成可判断、可讨论、可推进的路径。\n\n你能在不确定中找路线。规划、创新、低碳、智能建造、战略新兴业务、海外拓展、运营转型，这些带有未知感的任务，会激活你的思考能力。你适合出现在战略研究、路径设计、模式探索、前期策划和新业务孵化场景里。
+B1 战略雷达｜5分｜你对方向变化极其敏感。
+B2 节点压迫感｜3分｜节点重要，但你更关心节点背后的长期路径。
+B3 方案修复力｜5分｜你能把模糊趋势拆成可执行路线。
+B4 现场续航值｜3分｜你会去现场验证路径是否真实可走。
+B5 表格驯化力｜4分｜路径要落地，必须变成清单、阶段和责任。
+B6 合规护盾｜4分｜新路越新，边界越要清楚。
+B7 经营算盘｜3分｜你会评估新方向是否有长期价值。
+B8 结算潜行力｜2分｜你关注证据链，但主战场仍在前端路径设计。
+B9 客户连接度｜3分｜你会从客户变化中判断未来机会。
+B10 创优执念｜3分｜新路径走通后，你会考虑如何沉淀成果。
+B11 科技炼化值｜4分｜新技术、新模式、新平台都能激发你。
+B12 故事捕光力｜3分｜你能把路径讲清楚，让别人愿意跟上。
+B13 保障兜底力｜3分｜你会提前考虑资源条件和支撑系统。
+B14 团队充气值｜3分｜你给团队的信心来自“路已经看见了”。
+B15 抗压续航值｜4分｜不确定越多，你越愿意继续推演。
+PEAK｜攀峰者｜全局占比极其稀缺的0.06%，你一定就是天选之人吧，万里挑一的重要栋梁，带领团队触及荣誉巅峰的光！｜你对“完成任务”没有太强满足感，你更在意能不能做出辨识度、做出高光、做出可以被记住的成果。普通交付在你这里只是基础线，真正让你兴奋的是精品、示范、奖项、技术亮点和团队荣誉。你看项目时，常常会自动扫描：哪里能提炼成果，哪里能冲出经验，哪里能成为企业名片。\n\n你会把工作往更高处推。你不满足于把事情做完，更希望把事情做漂亮、做扎实、做出价值。你适合出现在创优策划、科技成果转化、品牌工程打造、重大荣誉申报等场景里。
+B1 战略雷达｜4分｜你能识别哪些任务具有标志性价值。
+B2 节点压迫感｜4分｜你知道高质量成果必须从节点过程里养出来。
+B3 方案修复力｜4分｜你会把普通方案往精品路径上继续打磨。
+B4 现场续航值｜4分｜你愿意盯细节，因为高峰藏在细节里。
+B5 表格驯化力｜3分｜创优资料、成果清单、过程记录，你会主动梳理。
+B6 合规护盾｜4分｜精品成果必须经得起检查和追问。
+B7 经营算盘｜3分｜你知道高品质会转化为品牌和市场价值。
+B8 结算潜行力｜3分｜你会注意成果背后的资料支撑。
+B9 客户连接度｜3分｜客户认可会被你视为成果价值的一部分。
+B10 创优执念｜5分｜你的奖杯雷达常年在线。
+B11 科技炼化值｜5分｜技术亮点越硬，你越想把它炼成成果。
+B12 故事捕光力｜4分｜你能把成果讲出高度、质感和记忆点。
+B13 保障兜底力｜3分｜为了高质量呈现，你愿意补上关键细节。
+B14 团队充气值｜4分｜你很会用荣誉感把队伍往上带。
+B15 抗压续航值｜4分｜越接近高峰，你越能扛住反复打磨。
+FIRE｜点火人｜全局占比极其稀缺的0.09%，你一定就是天选之人吧，万里挑一的重要栋梁，团队无可替代的灵魂发动机！｜你能让目标变得有温度，让任务变得有劲头，让团队在压力下重新看见意义。你负责鼓励，也负责传播；你擅长把方向、荣誉、故事和行动连接起来，把一句“大家再坚持一下”说得可信，把一次普通推进变成一次共同向前。\n\n你能把组织里的能量点燃。会议需要提气、项目需要动员、团队需要稳定、成果需要被看见时，你往往能站出来把话说亮，把场子托住。你适合出现在大型会议、攻坚动员、品牌传播、团队建设和荣誉激励场景里。
+B1 战略雷达｜4分｜你能把大方向转化成能打动人的表达。
+B2 节点压迫感｜3分｜节点紧张时，你更关注团队状态能不能稳住。
+B3 方案修复力｜3分｜你会从人心和节奏角度修正推进方式。
+B4 现场续航值｜3分｜你愿意到现场，因为真实场景最能点燃人。
+B5 表格驯化力｜2分｜表格不是你的主场，但必要时也能兜住。
+B6 合规护盾｜3分｜你知道表达要稳，鼓劲也要有边界。
+B7 经营算盘｜2分｜你会关注价值，但更擅长调动队伍能量。
+B8 结算潜行力｜1分｜资料深潜不是强项，情绪现场更适合你。
+B9 客户连接度｜4分｜你能把沟通变得顺畅，把关系变得更暖。
+B10 创优执念｜4分｜荣誉感是你点燃团队的重要燃料。
+B11 科技炼化值｜2分｜技术你会支持，但更关心大家能不能理解和参与。
+B12 故事捕光力｜5分｜你很会发现一个团队为什么值得被看见。
+B13 保障兜底力｜3分｜场面快冷下来时，你能补上那口气。
+B14 团队充气值｜5分｜你是团队情绪里的火种。
+B15 抗压续航值｜4分｜压力越大，你越会提醒大家为什么出发。
+`;
+
+        const personalities = {};
+        let mode = 'NORMAL';
+        let currentCode = '';
+
+        // Match the 22 sprite grid from sprite_3.jpg (horizontal strip 0-21)
+        const spriteOrder = [
+            'DATE', 'PLAN', 'BIRD', 'MECH',
+            'EXCL', 'SAFE', 'SPIN', 'CASH',
+            'SETT', 'TALK', 'TOWR', 'GOLD',
+            'TECH', 'MEME', 'BOXX', 'PUMP',
+            'BRK', 'PEAK', 'FIRE', 'PATH',
+            'OPEN', 'BALL'
+        ];
+
+        rawDimsData.split('\n').forEach(line => {
+            line = line.trim();
+            if (!line) return;
+            
+            if (line === '==HIDDEN==') {
+                mode = 'HIDDEN';
+                return;
+            }
+
+            if (line.match(/^[A-Z]+\｜/)) {
+                const parts = line.split('｜');
+                currentCode = parts[0].trim();
+                const currentName = parts[1].trim();
+                const rarityText = parts[2].trim();
+                const descText = parts[3].trim();
+                const isHidden = mode === 'HIDDEN';
+                
+                const spriteIndex = spriteOrder.indexOf(currentCode);
+                
+                // For a 22-item horizontal strip, each item is 1/22 of the total width
+                const bgX = (spriteIndex / 21) * 100;
+
+                personalities[currentCode] = {
+                    name: currentName,
+                    rarity: rarityText,
+                    desc: descText,
+                    isHidden: isHidden,
+                    dims: [],
+                    bgPosition: `${bgX}% 0%`, 
+                    bgSize: '2200% auto' 
+                };
+            } else if (line.match(/^B\d+/)) {
+                const parts = line.split('｜');
+                personalities[currentCode].dims.push({
+                    id: parts[0].split(' ')[0].trim(),
+                    name: parts[0].split(' ')[1].trim(),
+                    score: parseInt(parts[1].replace('分', '').trim()),
+                    text: parts[2].trim()
+                });
+            }
+        });
+
+        // 30 Questions with \n replaced by <br> in JS rendering
+        const questionsRaw = [
+            {q: "2024年1月10日，中建八局建立“挂图作战”工作机制，提升项目履约均质化、标准化水平。\n如果你站在这张作战图前，你最想做什么？", opts: [["红点不变绿，我今晚不闭眼。", "DATE"], ["做成台账，红黄绿排排坐。", "EXCL"], ["看看哪些项目能带出新客户。", "BIRD"], ["节点背后，产值回款也得跟上。", "CASH"], ["节点要抢，安全红线也要亮着。", "SAFE"], ["物资先盘清，别让材料拖后腿。", "BOXX"]]},
+            {q: "2024年1月16日，中建八局第七次党代会召开，明确全力建设“强优高大新八局”的战略目标。\n置身这场会议，你的第一反应是？", opts: [["目标很大，先拆成能干的路。", "PLAN"], ["关键词记下，回去给队伍提气。", "PUMP"], ["战略一动，风向已经起飞。", "BIRD"], ["目标要响，账也要清楚。", "CASH"], ["越是大目标，越要稳边界。", "SAFE"], ["这段话有分量，必须讲出声势。", "MEME"]]},
+            {q: "2024年1月25日，国产48K碳纤维拉杆在厦门翔安机场项目成功应用，实现该体系在大跨空间结构领域首次大规模应用。\n听到这个突破，你会先关注什么？", opts: [["现场怎么用，落地最关键。", "MECH"], ["关键信息整理成一页纸。", "EXCL"], ["国产突破，会带来新合作吗？", "TOWR"], ["新材料能不能降本增效？", "CASH"], ["首次应用，验证必须扎实。", "SAFE"], ["技术亮点够硬，成果要“炼”出来。", "TECH"]]},
+            {q: "2024年2月1日，中建八局印发“深化项目管理、提升发展质量”三年行动方案，聚焦项目管理九项重点工作。\n面对这项行动，你更可能站在哪个位置？", opts: [["站在节点旁，盯住进度往前拱。", "DATE"], ["站在材料旁，把要求变清单。", "BOXX"], ["管理稳，客户信任自然来。", "TOWR"], ["质量提升，效益也要跟上。", "CASH"], ["规范动作，一个都别漏。", "SAFE"], ["管理做漂亮，也能冲示范。", "GOLD"]]},
+            {q: "2024年2月8日，中建八局中标榆林小西沙片区棚户区改造项目，我局中标100.1亿元。\n看到这类百亿民生城市更新项目，你最先想到什么？", opts: [["大项目先看关键节点。", "DATE"], ["民生工程要讲出温度。", "MEME"], ["区域深耕，机会来了。", "TALK"], ["百亿项目，账要算细。", "CASH"], ["体量越大，风险越要前置。", "SAFE"], ["物资供应链得先稳住。", "BOXX"]]},
+            {q: "2024年2月21日，中建八局印发2024—2030年发展规划，“2+5”规划成为打造强优高大新八局的纲领性文件。\n读到这份规划，你会先做什么？", opts: [["拆目标，排路径，先落地。", "PLAN"], ["做张表，别让规划飘着。", "EXCL"], ["看看哪些赛道先冒头。", "BIRD"], ["投资方向要看长期回报。", "CASH"], ["规划很远，风控要近。", "SAFE"], ["讲清方向，大家才有劲。", "PUMP"]]},
+            {q: "2024年3月8日，中建八局承建的马来西亚沙巴州第一高楼亚庇双子塔通过竣工验收。\n如果你站在海外项目竣工现场，你最想做什么？", opts: [["复盘海外履约怎么打赢。", "SPIN"], ["海外高光，必须留下镜头。", "MEME"], ["客户伙伴，信号不能断。", "TOWR"], ["海外项目，收益风险都要算。", "CASH"], ["属地规则先吃透。", "SAFE"], ["经验沉淀，下一站继续用。", "PLAN"]]},
+            {q: "2024年3月11日，中建八局召开第三届创新大会暨战略性新兴产业推进会，部署创新重点任务、培育新质生产力。\n看到这条大事记，你第一反应是？", opts: [["创新要能回到现场干活。", "MECH"], ["大会重点先整理出来。", "EXCL"], ["新质生产力，风已经来了。", "BIRD"], ["创新也要会创效。", "CASH"], ["新业务越新，边界越要清。", "SAFE"], ["好成果要冲奖，也要转化。", "GOLD"]]},
+            {q: "2024年3月23日，中建八局中标临港青少年活动中心运营权，这是八局在上海获取的首个城市场馆类运营项目。\n你会怎样理解这件事？", opts: [["运营项目，模式要重新设计。", "PLAN"], ["长期服务，细节最见功夫。", "BOXX"], ["属地、学校、公众都要聊顺。", "TALK"], ["运营不是热闹，要看现金流。", "CASH"], ["面向公众，安全标准要拉满。", "SAFE"], ["公共空间很有故事感。", "MEME"]]},
+            {q: "2024年3月28日，中建八局印发“大监督体系建设深化年”实施方案，推动监督体系全面覆盖、协同配合、权威高效。\n你的反应更接近哪一种？", opts: [["监督也要有节点闭环。", "DATE"], ["材料流程附件，我来补齐。", "BOXX"], ["治理稳，客户更放心。", "TOWR"], ["风险少一点，损耗少一点。", "CASH"], ["红线先亮，大家少踩坑。", "SAFE"], ["严管厚爱，也能讲得暖。", "PUMP"]]},
+            {q: "2024年4月18日，中建八局承建的大连重工大型高端风电核心零部件智能制造基地竣工投产。\n面对这个新能源制造基地，你更关注什么？", opts: [["竣工投产，节点硬兑现。", "DATE"], ["产业案例，值得好好讲。", "MEME"], ["风电链条，机会要盯住。", "BIRD"], ["新能源制造，价值要算清。", "CASH"], ["高端制造，安全标准不能软。", "SAFE"], ["设备物资保障要跟得上。", "BOXX"]]},
+            {q: "2024年4月19日，中建八局发行市场首单与建筑建设期碳排放强度相关的低碳转型挂钩债券。\n看到这条大事记，你最想问哪一句？", opts: [["碳排管理怎么嵌进项目？", "PLAN"], ["高级案例，要讲得听得懂。", "MEME"], ["绿色金融，风向很明显。", "BIRD"], ["低碳债券，价值怎么算？", "CASH"], ["数据披露，边界要经得住问。", "SAFE"], ["绿色物资采购要跟上节奏。", "BOXX"]]},
+            {q: "2024年4月22日，中建八局举办首届职工创新成果评选大赛决赛，激发全局职工创新创效活力。\n置身现场，你会站在哪里？", opts: [["成果能不能解决现场问题？", "MECH"], ["流程顺不顺，我来兜底。", "BOXX"], ["创新成果能不能对接客户？", "TOWR"], ["能不能创效，先算一笔。", "CASH"], ["评选规则要公平合规。", "SAFE"], ["奖杯旁边，先许个愿。", "GOLD"]]},
+            {q: "2024年4月26日，国内最大规模应用预制装配式车站技术的青岛地铁6号线一期工程开通运营。\n你会优先关注哪一点？", opts: [["开通运营，节点够硬。", "DATE"], ["城市交通故事很好讲。", "MEME"], ["轨交市场还能继续深耕。", "TALK"], ["合同成本收益要跟踪。", "CASH"], ["运营节点，安全不能掉链。", "SAFE"], ["构件供应和运输节奏要稳。", "BOXX"]]},
+            {q: "2024年5月7日，中建八局荣获“中国钢结构金奖”26项金奖，含2项杰出工程大奖。\n看到这条荣誉，你会怎么反应？", opts: [["先复盘工程怎么干成的。", "PLAN"], ["26项金奖，必须讲出来。", "MEME"], ["荣誉会增强客户认可。", "TOWR"], ["奖项也能转市场优势。", "CASH"], ["好工程先要经得起检查。", "SAFE"], ["下一批奖杯已经在招手。", "GOLD"]]},
+            {q: "2024年5月15日，中建八局印发安全生产治本攻坚三年行动实施方案，通过“隐患攻坚年、强基固本年、效能提升年”持续提升安全水平。\n你最可能关注什么？", opts: [["节点再紧，安全动作不能少。", "DATE"], ["三年行动先做阶段表。", "EXCL"], ["安全能力也是客户信任。", "TOWR"], ["事故是最大经营损耗。", "CASH"], ["隐患清单先立起来。", "SAFE"], ["物资进场也要守安全关。", "BOXX"]]},
+            {q: "2024年5月29日，中绿电米东光伏项目成功并网，所属新疆米东3.5GW光伏项目为世界最大单体光伏项目。\n看到“世界最大单体光伏”，你最先想到什么？", opts: [["大体量，组织和节点都不容易。", "DATE"], ["“世界最大”，传播关键词锁定。", "MEME"], ["新能源赛道还要先飞。", "BIRD"], ["项目价值值得算清。", "CASH"], ["场区大，安全管理不能靠感觉。", "SAFE"], ["光伏物资供应链要顶得住。", "BOXX"]]},
+            {q: "2024年5月29日，中建八局自主研发的“天蝉”住宅施工机器人系统在山东青岛发布。\n如果你在发布会现场，你最想做什么？", opts: [["看它怎么帮现场提效。", "MECH"], ["出场名场面必须记录。", "MEME"], ["智能建造市场可能打开。", "BIRD"], ["研发投入回报要算明白。", "CASH"], ["人机协同，安全边界要清楚。", "SAFE"], ["冲科技奖，冲创新奖。", "GOLD"]]},
+            {q: "2024年6月1日，中建八局无人化梁厂UBF2.0发布，推动桥梁建造迈向少人化新时代。\n你会先关注什么？", opts: [["设备怎么转，现场最诚实。", "MECH"], ["发布会动线要顺，别卡壳。", "BOXX"], ["少人化梁厂能成新名片。", "BIRD"], ["少人化能省多少、快多少？", "CASH"], ["无人化也要防风险。", "SAFE"], ["示范点气质已经有了。", "GOLD"]]},
+            {q: "2024年6月19日，中建八局执董会审议通过合规管理体系有效性评价实施方案，并组织评价组赴多家二级单位开展评价。\n你更像哪种状态？", opts: [["评价有节点，整改别拖。", "DATE"], ["资料目录在手，心里不抖。", "BOXX"], ["合规稳，客户更敢托付。", "TOWR"], ["合规少扣分，经营少流血。", "CASH"], ["依据标准先确认。", "SAFE"], ["评价是帮我们更稳。", "PUMP"]]},
+            {q: "2024年6月25日，中建八局完成国内首座混凝土3D打印UHPC曲线梁桥示范应用。\n看到这条科技大事，你会怎么反应？", opts: [["示范应用要看现场表现。", "MECH"], ["“国内首座”标题感很强。", "MEME"], ["前沿技术能带来合作资源。", "BIRD"], ["成本效率价值要算。", "CASH"], ["新工艺验收要扎实。", "SAFE"], ["技术成果够硬，值得沉淀。", "TECH"]]},
+            {q: "2024年7月23日，中建八局召开项目管理大会暨项目经理大会，提出“项目管理规范年”，并建立系列制度和挂图作战机制。\n你更认同哪种打开方式？", opts: [["项目管理先管关键线路。", "DATE"], ["会后纪要、督办、材料都要跟上。", "BOXX"], ["规范管理也是客户选择理由。", "TOWR"], ["管理提升要落到效益。", "CASH"], ["规范年，流程别掉链。", "SAFE"], ["制度要变成能干的动作。", "PLAN"]]},
+            {q: "2024年7月26日，中建八局中标鹿城工业园区有机更新一期合作开发项目，中标额114亿元，系百亿级城市更新项目。\n看到这条消息，你会怎么反应？", opts: [["大项目先靠策划控住。", "PLAN"], ["城市更新故事自带蝶变感。", "MEME"], ["区域深耕，客户要做厚。", "TALK"], ["百亿项目，资金先看稳。", "CASH"], ["界面复杂，安全合规要靠前。", "SAFE"], ["物资采购也要提前排兵布阵。", "BOXX"]]},
+            {q: "2024年8月30日，中建八局全智数营WIDO模式发布，融合数字化、智能化、绿色化理念，助力打造海洋装备“灯塔工厂”。\n你第一反应是？", opts: [["模式推广先做路径图。", "PLAN"], ["“灯塔工厂”四个字太会发光。", "MEME"], ["新模式可能带来新市场。", "BIRD"], ["能不能变产品、变收益？", "CASH"], ["数字系统要守住数据安全。", "SAFE"], ["智能设备和物资体系要匹配。", "BOXX"]]},
+            {q: "2024年9月3日，上海企业100强榜单发布，中建八局位列第4位，较去年提升4位。\n看到这个排名，你会怎么想？", opts: [["排名靠前，更要靠履约坐实。", "DATE"], ["企业高光，要讲出自信。", "MEME"], ["排名提升，客户信心更足。", "TOWR"], ["背后的经营指标要算清。", "CASH"], ["企业越大，治理越要稳。", "SAFE"], ["队伍争气，得给大家鼓掌。", "PUMP"]]},
+            {q: "2024年9月12日，中建八局携苍穹AI智能管控平台、绿碳方舟、天蝉造楼机器人、智慧运维系统等建造“黑科技”亮相服贸会。\n置身展台，你会怎么做？", opts: [["看技术能不能服务项目管理。", "PLAN"], ["展台画面必须抓住。", "MEME"], ["黑科技集中亮相，风向明显。", "BIRD"], ["技术展示最终要价值转化。", "CASH"], ["AI平台要注意数据安全。", "SAFE"], ["设备、模型、展陈物资不能掉线。", "BOXX"]]},
+            {q: "2024年9月22日，中建八局承建的无锡国家软件园五期9号楼获评国家首批零碳建筑，是江苏省首个获此荣誉项目。\n你的反应是？", opts: [["零碳建筑落地过程值得复盘。", "PLAN"], ["绿色低碳标杆要讲透。", "MEME"], ["绿色建造正变成客户关注点。", "BIRD"], ["成本投入和长期收益要算清。", "CASH"], ["零碳数据和认证边界要稳。", "SAFE"], ["国家首批、江苏首个，冲优气质拉满。", "GOLD"]]},
+            {q: "2024年9月26日，亚洲最大温室花园——上海温室花园正式对外开放。\n如果你在开放当天现场，你更想做什么？", opts: [["现场转一圈，细节要稳。", "SPIN"], ["最美画面必须抓住。", "MEME"], ["公共空间，是属地连接好机会。", "TALK"], ["大型公共项目要看运营价值。", "CASH"], ["对外开放，安全保障要到位。", "SAFE"], ["品质这么亮，创优可以想。", "GOLD"]]},
+            {q: "2024年10月14日，中建八局中标凤凰黄河大桥南延工程，签约合同额119.9亿元。\n看到这个重大基础设施项目，你更关注什么？", opts: [["大桥现场一定硬核。", "MECH"], ["大工程天生有故事。", "MEME"], ["重大基建能打开区域合作。", "BIRD"], ["百亿项目要盯成本效益。", "CASH"], ["大桥施工风险必须前置。", "SAFE"], ["钢材、设备、供应节奏要稳。", "BOXX"]]},
+            {q: "2024年11月4日，中建八局在埃及新行政首都CBD项目召开纪念走出海外40周年系列活动启动会。\n看到“出海40年”，你会怎么反应？", opts: [["海外经验要沉淀成路径。", "PLAN"], ["海外故事要讲出时代感。", "MEME"], ["海外伙伴信号线不能断。", "TOWR"], ["海外项目风险收益要算明白。", "CASH"], ["海外合规安全要放前面。", "SAFE"], ["给海外团队打气，他们值得被看见。", "PUMP"]]}
+        ];
+
+        window.app = {
+            state: {
+                currentQIndex: 0,
+                scores: {},
+                history: [], 
+                currentQuestions: [],
+                isAnimating: false,
+                cheatSequence: '' // 预埋测试通关码记录
+            },
+            
+            elements: {
+                welcome: document.getElementById('welcome-screen'),
+                quiz: document.getElementById('quiz-screen'),
+                loader: document.getElementById('loading-screen'),
+                result: document.getElementById('result-screen'),
+                qText: document.getElementById('question-text'),
+                optContainer: document.getElementById('options-container'),
+                progBar: document.getElementById('progress-bar'),
+                progText: document.getElementById('progress-text'),
+                btnPrev: document.getElementById('btn-prev'),
+                toast: document.getElementById('toast'),
+                dimsContainer: document.getElementById('dimensions-container')
+            },
+
+            startTest() {
+                // Randomly extract 20 distinct questions, KEEPING chronological order
+                let indices = [];
+                while(indices.length < 20) {
+                    let r = Math.floor(Math.random() * questionsRaw.length);
+                    if(indices.indexOf(r) === -1) indices.push(r);
+                }
+                indices.sort((a, b) => a - b);
+                
+                this.state.currentQuestions = indices.map(i => questionsRaw[i]);
+
+                this.elements.welcome.classList.add('fade-out');
+                setTimeout(() => {
+                    this.elements.welcome.classList.add('hidden');
+                    this.elements.welcome.classList.remove('fade-out');
+                    this.elements.quiz.classList.remove('hidden');
+                    this.elements.quiz.classList.add('fade-in');
+                    this.resetState();
+                    this.renderQuestion();
+                }, 300);
+            },
+
+            resetState() {
+                this.state.currentQIndex = 0;
+                this.state.history = [];
+                this.state.scores = {};
+                this.state.cheatSequence = '';
+                Object.keys(personalities).forEach(key => this.state.scores[key] = 0);
+            },
+
+            renderQuestion() {
+                const totalQs = this.state.currentQuestions.length;
+                const q = this.state.currentQuestions[this.state.currentQIndex];
+                
+                const progressPercent = ((this.state.currentQIndex) / totalQs) * 100;
+                this.elements.progBar.style.width = `${Math.max(5, progressPercent)}%`;
+                this.elements.progText.textContent = `${this.state.currentQIndex + 1} / ${totalQs}`;
+
+                if (this.state.currentQIndex > 0) {
+                    this.elements.btnPrev.classList.remove('opacity-0', 'pointer-events-none');
+                } else {
+                    this.elements.btnPrev.classList.add('opacity-0', 'pointer-events-none');
+                }
+
+                this.elements.qText.classList.remove('fade-in');
+                this.elements.optContainer.classList.remove('fade-in');
+                void this.elements.qText.offsetWidth; 
+
+                this.elements.qText.innerHTML = `<span class="text-blue-600 mr-2">${this.state.currentQIndex + 1}.</span>${q.q.replace(/\n/g, '<br>')}`;
+                this.elements.optContainer.innerHTML = '';
+
+                const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+                q.opts.forEach((opt, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn w-full text-left p-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 flex items-start gap-4 text-slate-700 transition-colors shadow-sm';
+                    btn.onclick = () => this.handleOptionClick(opt[1], btn, index);
+                    btn.innerHTML = `
+                        <span class="flex-shrink-0 w-6 h-6 rounded bg-slate-100 text-slate-500 flex items-center justify-center text-sm font-bold mt-0.5 border border-slate-200">${letters[index]}</span>
+                        <span class="font-medium leading-relaxed">${opt[0]}</span>
+                    `;
+                    this.elements.optContainer.appendChild(btn);
+                });
+
+                this.elements.qText.classList.add('fade-in');
+                this.elements.optContainer.classList.add('fade-in');
+                this.state.isAnimating = false;
+            },
+
+            prevQuestion() {
+                if (this.state.isAnimating || this.state.currentQIndex === 0) return;
+                
+                const lastSelectedType = this.state.history.pop();
+                if (lastSelectedType && this.state.scores[lastSelectedType] > 0) {
+                    this.state.scores[lastSelectedType]--;
+                }
+                
+                // 撤销作弊码记录
+                this.state.cheatSequence = this.state.cheatSequence.slice(0, -1);
+                
+                this.state.currentQIndex--;
+                this.renderQuestion();
+            },
+
+            handleOptionClick(type, btnElement, optIndex) {
+                if (this.state.isAnimating) return;
+                this.state.isAnimating = true;
+
+                btnElement.classList.add('selected', 'ring-2', 'ring-blue-500', 'ring-offset-1');
+                this.state.scores[type] = (this.state.scores[type] || 0) + 1;
+                this.state.history.push(type);
+
+                // 记录选项字母，用于匹配测试通关码
+                const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+                this.state.cheatSequence += letters[optIndex];
+
+                setTimeout(() => {
+                    if (this.state.currentQIndex < this.state.currentQuestions.length - 1) {
+                        this.state.currentQIndex++;
+                        this.renderQuestion();
+                    } else {
+                        this.processResult();
+                    }
+                }, 300);
+            },
+
+            processResult() {
+                this.elements.progBar.style.width = '100%';
+                this.elements.quiz.classList.add('hidden');
+                this.elements.loader.classList.remove('hidden');
+                this.elements.loader.classList.add('flex');
+
+                setTimeout(() => {
+                    this.elements.loader.classList.remove('flex');
+                    this.elements.loader.classList.add('hidden');
+                    const code = this.calculateResultCode();
+                    this.showResult(code);
+                }, 2000);
+            },
+
+            countSupportCodes(scores, codesArray) {
+                return codesArray.filter(code => (scores[code] || 0) >= 1).length;
+            },
+
+            calculateResultCode() {
+                // 0. 优先判断是否有预埋测试作弊码输入
+                const cheatMap = {
+                    "AFCBDEAFBCDEAFBCDAFE": "DATE",
+                    "BDAFCEBDACEFBDACFEBA": "PLAN",
+                    "CFABDECFBDAECFABDEAC": "BIRD",
+                    "DACFBEADFCBEADCFBEAF": "MECH",
+                    "EABDCFCEABDFCEABDCFA": "EXCL",
+                    "FCEBADFCEABDCFEBADAC": "SAFE",
+                    "ABDFECABCFDEABDFCEBA": "SPIN",
+                    "BCFEADBCDAFEBCFEADCA": "CASH",
+                    "CDEAFBCDEFABCADEFBAC": "SETT",
+                    "DEFACBDEBCAFDEFACBDA": "TALK",
+                    "EFCBADFEACBDEFCBADAE": "TOWR",
+                    "FADECBFABCDEFADECBFA": "GOLD",
+                    "ACFDBEACDBFEACFDBECA": "TECH",
+                    "BFEACDBFCADEBFEACDAB": "MEME",
+                    "CAEBFDCAFDBECAEBFDAC": "BOXX",
+                    "DBCAEFDBFEACDBCAEFBF": "PUMP",
+                    "FEDCBAAFEEDDCCBBAAFF": "BRK",
+                    "ABCDEFABCFEDABCDEFBA": "PEAK",
+                    "FADFCEBCAFEDBCAFEADF": "FIRE",
+                    "CEADFBCEBFADCEADFBCD": "PATH",
+                    "EBFADCEBADCFEBFADCAE": "OPEN",
+                    "FFEEDDCCBBAAFFEEDDCC": "BALL"
+                };
+                
+                if (cheatMap[this.state.cheatSequence]) {
+                    return cheatMap[this.state.cheatSequence];
+                }
+
+                const s = this.state.scores;
+                const getS = (code) => s[code] || 0;
+                
+                // Normal priorities
+                const normalPriority = ['DATE', 'PLAN', 'SAFE', 'CASH', 'BOXX', 'EXCL', 'BIRD', 'TOWR', 'TALK', 'MEME', 'GOLD', 'MECH', 'TECH', 'PUMP', 'SETT', 'SPIN'];
+                
+                let uniqueScores = [...new Set(normalPriority.map(getS))].sort((a,b) => b-a);
+                const topNormalScore = uniqueScores[0] || 0;
+                const secondNormalScore = uniqueScores[1] || 0;
+
+                let topCodes = normalPriority.filter(k => getS(k) === topNormalScore);
+                topCodes.sort((a, b) => normalPriority.indexOf(a) - normalPriority.indexOf(b));
+                const topNormalCode = topCodes[0];
+
+                // 强单一锁定
+                if (topNormalScore >= 7 && secondNormalScore <= 3) {
+                    return topNormalCode;
+                }
+
+                // 隐藏人格计算
+                const hiddens = [];
+
+                // BRK
+                const brkScore = getS('PLAN')*3 + getS('DATE')*3 + getS('MECH')*2 + getS('SAFE')*2 + getS('CASH')*1 + getS('BOXX')*1 + getS('TECH')*1;
+                if (getS('PLAN')>=3 && getS('DATE')>=3 && (getS('MECH')+getS('SAFE'))>=4 && (getS('CASH')+getS('BOXX')+getS('TECH'))>=2 && brkScore>=28) {
+                    if (this.countSupportCodes(s, ['PLAN','DATE','MECH','SAFE','CASH','BOXX','TECH']) >= 5) {
+                        hiddens.push({ code: 'BRK', score: brkScore });
+                    }
+                }
+
+                // PEAK
+                const peakScore = getS('GOLD')*4 + getS('TECH')*3 + getS('MEME')*2 + getS('PLAN')*1 + getS('DATE')*1 + getS('SAFE')*1;
+                if (getS('GOLD')>=4 && getS('TECH')>=2 && (getS('MEME')+getS('PLAN')+getS('DATE')+getS('SAFE'))>=4 && peakScore>=26) {
+                    if (this.countSupportCodes(s, ['GOLD','TECH','MEME','PLAN','DATE','SAFE']) >= 4) {
+                        hiddens.push({ code: 'PEAK', score: peakScore });
+                    }
+                }
+
+                // FIRE
+                const fireScore = getS('PUMP')*4 + getS('MEME')*3 + getS('TALK')*2 + getS('TOWR')*2 + getS('GOLD')*1;
+                if (getS('PUMP')>=4 && getS('MEME')>=3 && (getS('TALK')+getS('TOWR')+getS('GOLD'))>=3 && fireScore>=29) {
+                    if (this.countSupportCodes(s, ['PUMP','MEME','TALK','TOWR','GOLD']) >= 4) {
+                        hiddens.push({ code: 'FIRE', score: fireScore });
+                    }
+                }
+
+                // PATH
+                const pathScore = getS('BIRD')*4 + getS('PLAN')*3 + getS('TECH')*2 + getS('SAFE')*1 + getS('EXCL')*1;
+                if (getS('BIRD')>=4 && getS('PLAN')>=3 && (getS('TECH')+getS('SAFE')+getS('EXCL'))>=3 && pathScore>=28) {
+                    if (this.countSupportCodes(s, ['BIRD','PLAN','TECH','SAFE','EXCL']) >= 4) {
+                        hiddens.push({ code: 'PATH', score: pathScore });
+                    }
+                }
+
+                // OPEN
+                const openScore = getS('TALK')*4 + getS('TOWR')*3 + getS('BIRD')*3 + getS('CASH')*2 + getS('MEME')*1 + getS('PLAN')*1;
+                if ((getS('TALK')+getS('TOWR'))>=6 && getS('BIRD')>=3 && (getS('CASH')+getS('MEME')+getS('PLAN'))>=3 && openScore>=31) {
+                    if (this.countSupportCodes(s, ['TALK','TOWR','BIRD','CASH','MEME','PLAN']) >= 5) {
+                        hiddens.push({ code: 'OPEN', score: openScore });
+                    }
+                }
+
+                // BALL
+                const ballScore = getS('SAFE')*4 + getS('BOXX')*3 + getS('EXCL')*3 + getS('PLAN')*1 + getS('DATE')*1 + getS('CASH')*1 + getS('PUMP')*1;
+                if (getS('SAFE')>=5 && getS('BOXX')>=4 && getS('EXCL')>=2 && (getS('PLAN')+getS('DATE')+getS('CASH')+getS('PUMP'))>=4 && ballScore>=34) {
+                    if (this.countSupportCodes(s, ['SAFE','BOXX','EXCL','PLAN','DATE','CASH','PUMP']) >= 5) {
+                        hiddens.push({ code: 'BALL', score: ballScore });
+                    }
+                }
+
+                if (hiddens.length === 0) {
+                    return topNormalCode;
+                }
+
+                if (hiddens.length === 1) {
+                    return hiddens[0].code;
+                }
+
+                hiddens.sort((a, b) => b.score - a.score);
+                
+                if (hiddens[0].score - hiddens[1].score >= 6) {
+                    return hiddens[0].code;
+                } else {
+                    return topNormalCode;
+                }
+            },
+
+            showResult(typeCode) {
+                const result = personalities[typeCode];
+                const cardWrapper = document.getElementById('card-wrapper');
+                const innerCard = document.getElementById('inner-card');
+                
+                document.getElementById('res-main-title').innerHTML = `${result.name} <span class="text-2xl text-slate-400 font-semibold tracking-normal inline-block align-baseline">(${typeCode})</span>`;
+                
+                const rarityBox = document.getElementById('rarity-box');
+                const avatarBox = document.getElementById('res-avatar-box');
+                const rarityText = document.getElementById('res-rarity-text');
+                const avatarBg = document.getElementById('res-avatar-bg');
+
+                // Remove existing shimmer if any
+                const existingShimmer = innerCard.querySelector('.shimmer');
+                if(existingShimmer) existingShimmer.remove();
+
+                if(result.isHidden) {
+                    // 隐藏人格：金色闪耀发光特效
+                    cardWrapper.className = "hidden-glow rounded-[1.75rem] transition-all duration-700 p-1 bg-gradient-to-r from-amber-300 via-yellow-500 to-amber-300";
+                    avatarBox.className = "w-48 h-48 rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(245,158,11,0.5)] border-4 border-amber-100 mb-4 relative bg-amber-50 overflow-hidden transition-transform hover:scale-105 duration-300 flex items-center justify-center";
+                    rarityBox.className = "mt-4 bg-gradient-to-r from-amber-100 to-orange-100 border border-amber-300 p-4 rounded-2xl relative overflow-hidden group w-full max-w-sm";
+                    rarityText.className = "text-sm font-bold text-amber-900 leading-relaxed text-left";
+                    
+                    // Add shimmer overlay
+                    const shimmer = document.createElement('div');
+                    shimmer.className = 'shimmer';
+                    innerCard.appendChild(shimmer);
+                    innerCard.className = "bg-white/95 rounded-3xl shadow-sm border-0 p-6 md:p-8 w-full h-full relative overflow-hidden";
+                    
+                } else {
+                    // 普通人格：清爽常规特效
+                    cardWrapper.className = "rounded-[1.75rem] transition-all duration-700";
+                    avatarBox.className = "w-48 h-48 rounded-[2rem] shadow-xl border-4 border-white mb-4 relative bg-slate-50 overflow-hidden transition-transform hover:scale-105 duration-300 flex items-center justify-center";
+                    rarityBox.className = "mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-4 rounded-2xl relative overflow-hidden group w-full max-w-sm";
+                    rarityText.className = "text-sm font-bold text-blue-900 leading-relaxed text-left";
+                    innerCard.className = "bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8 w-full h-full relative overflow-hidden";
+                }
+                
+                rarityText.textContent = result.rarity;
+                document.getElementById('res-desc').textContent = result.desc;
+
+                avatarBg.style.backgroundImage = 'none'; // Clear before testing
+                avatarBg.textContent = ''; // clear text
+
+                // Load image dynamically to prevent 404 in CSS and avoid external CORS taint
+                const img = new Image();
+                img.onload = () => { 
+                    avatarBg.className = 'absolute inset-0 bg-no-repeat transition-all duration-300';
+                    avatarBg.style.backgroundImage = `url('sprite_3.jpg')`;
+                    avatarBg.style.backgroundSize = result.bgSize;
+                    avatarBg.style.backgroundPosition = result.bgPosition;
+                };
+                img.onerror = () => { 
+                    // 彻底移除外部网址，改用安全的 CSS 纯色块，避免污染画布
+                    avatarBg.className = `absolute inset-0 transition-all duration-300 flex items-center justify-center font-black text-4xl text-white ${result.isHidden ? 'bg-amber-400' : 'bg-blue-500'}`;
+                    avatarBg.style.backgroundImage = 'none';
+                    avatarBg.textContent = typeCode;
+                };
+                img.src = 'sprite_3.jpg';
+
+                // Render Dimensions
+                this.elements.dimsContainer.innerHTML = '';
+                result.dims.forEach((dim, idx) => {
+                    const el = document.createElement('div');
+                    el.className = 'w-full mb-1';
+                    
+                    const colorFill = result.isHidden ? 
+                        (dim.score >= 4 ? 'bg-amber-500' : (dim.score === 3 ? 'bg-orange-400' : 'bg-yellow-400')) :
+                        (dim.score >= 4 ? 'bg-blue-600' : (dim.score === 3 ? 'bg-emerald-500' : 'bg-cyan-500'));
+                        
+                    const colorText = result.isHidden ? 
+                        (dim.score >= 4 ? 'text-amber-700' : (dim.score === 3 ? 'text-orange-600' : 'text-yellow-600')) :
+                        (dim.score >= 4 ? 'text-blue-700' : (dim.score === 3 ? 'text-emerald-600' : 'text-cyan-600'));
+
+                    el.innerHTML = `
+                        <div class="flex justify-between items-end mb-1 px-1">
+                            <div>
+                                <span class="font-bold text-slate-700 text-sm">${dim.id} ${dim.name}</span>
+                                <span class="text-xs text-slate-400 ml-2 block sm:inline mt-0.5">${dim.text}</span>
+                            </div>
+                            <div class="font-black text-sm ${colorText} flex-shrink-0 bg-slate-50 px-2 py-0.5 rounded border border-slate-100">${dim.score} 分</div>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200/50">
+                            <div class="h-full rounded-full dim-bar ${colorFill}" style="width: 0%"></div>
+                        </div>
+                    `;
+                    this.elements.dimsContainer.appendChild(el);
+                    
+                    setTimeout(() => {
+                        el.querySelector('.dim-bar').style.width = `${(dim.score / 5) * 100}%`;
+                    }, 300 + (idx * 50));
+                });
+                
+                this.elements.result.classList.remove('hidden');
+                this.elements.result.classList.add('fade-in');
+                window.scrollTo(0,0);
+            },
+
+            resetTest() {
+                this.elements.result.classList.add('hidden');
+                this.elements.welcome.classList.remove('hidden');
+                this.elements.welcome.classList.add('slide-up');
+            },
+
+            generatePoster() {
+                this.showToast();
+                const actionBar = document.getElementById('action-bar');
+                const dimSection = document.getElementById('dimension-section'); 
+                actionBar.style.display = 'none';
+                dimSection.style.display = 'none';
+
+                // Allow DOM to settle before rendering (300ms is safer)
+                setTimeout(() => {
+                    const captureArea = document.getElementById('capture-area');
+                    html2canvas(captureArea, {
+                        scale: 2, 
+                        useCORS: true,
+                        allowTaint: true, // 核心：允许本地环境渲染图片（即使被判定污染）
+                        backgroundColor: '#f8fafc'
+                    }).then(canvas => {
+                        actionBar.style.display = 'flex'; 
+                        dimSection.style.display = 'block'; 
+                        
+                        const posterImage = document.getElementById('poster-image');
+                        const canvasContainer = document.getElementById('canvas-container');
+                        const modal = document.getElementById('poster-modal');
+                        const tip = document.getElementById('poster-tip');
+                        
+                        try {
+                            // 尝试转为可长按保存的图片（线上环境/无安全限制时执行）
+                            const imgData = canvas.toDataURL('image/png');
+                            posterImage.src = imgData;
+                            posterImage.classList.remove('hidden');
+                            canvasContainer.classList.add('hidden');
+                            tip.textContent = '✨ 长按图片保存分享';
+                        } catch (e) {
+                            // 核心修复：本地双击打开被浏览器拦截时的无感降级方案
+                            // 既然不让转图片，就把画好的 Canvas 直接贴出来看，提示截屏
+                            posterImage.classList.add('hidden');
+                            canvasContainer.innerHTML = '';
+                            canvas.style.width = '100%';
+                            canvas.style.height = 'auto';
+                            canvasContainer.appendChild(canvas);
+                            canvasContainer.classList.remove('hidden');
+                            tip.innerHTML = '✨ <span class="text-amber-300">请使用手机【截屏】保存海报</span>';
+                        }
+                        
+                        modal.classList.remove('hidden');
+                        modal.classList.add('flex');
+                    }).catch(err => {
+                        console.error('Error generating poster:', err);
+                        actionBar.style.display = 'flex';
+                        dimSection.style.display = 'block';
+                        alert("海报生成异常，请重试。");
+                    });
+                }, 300);
+            },
+
+            showToast() {
+                this.elements.toast.style.opacity = '1';
+                setTimeout(() => {
+                    this.elements.toast.style.opacity = '0';
+                }, 2000);
+            }
+        };
+    </script>
+</body>
+</html>
